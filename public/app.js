@@ -1,4 +1,8 @@
 const Timer = React.createClass({
+  handleTrashClick: function() {
+    this.props.onTrashClick(this.props.id);
+  },
+
   render: function() {
     const elapsedString = helpers.renderElapsedString(this.props.elapsed);
 
@@ -15,7 +19,7 @@ const Timer = React.createClass({
               <i className="edit icon" onClick={this.props.onEditClick} />
             </span>
             <span className="right floated trash icon">
-              <i className="trash icon" />
+              <i className="trash icon" onClick={this.handleTrashClick} />
             </span>
           </div>
         </div>
@@ -161,6 +165,7 @@ const EditableTimer = React.createClass({
           elapsed={this.props.elapsed}
           runningSince={this.props.runningSincen}
           onEditClick={this.handleEditClick}
+          onTrashClick={this.props.onTrashClick}
         />
       );
     }
@@ -178,6 +183,7 @@ const EditableTimerList = React.createClass({
         elapsed={timer.elapsed}
         runningSince={timer.runningSince}
         onFormSubmit={this.props.onFormSubmit}
+        onTrashClick={this.props.onTrashClick}
       />
     ));
     return <div id="timers">{timers}</div>;
@@ -214,6 +220,10 @@ const TimersDashboard = React.createClass({
     this.updateTimer(attrs);
   },
 
+  onTrashClick: function(timerId) {
+    this.removeTimer(timerId)
+  },
+
   createTimer: function(timer) {
     const newTimer = helpers.newTimer(timer);
     this.setState({ timers: this.state.timers.concat(newTimer) });
@@ -226,7 +236,7 @@ const TimersDashboard = React.createClass({
           return Object.assign({}, timer, {
             title: attrs.title,
             project: attrs.project
-          })
+          });
         } else {
           return timer;
         }
@@ -234,11 +244,21 @@ const TimersDashboard = React.createClass({
     });
   },
 
+  removeTimer: function(timerId) {
+    this.setState({
+      timers: this.state.timers.filter(timer => timer.id !== timerId)
+    });
+  },
+
   render() {
     return (
       <div className="ui three column centered grid">
         <div className="column">
-          <EditableTimerList timers={this.state.timers} onFormSubmit={this.handleEditFormSubmit} />
+          <EditableTimerList
+            timers={this.state.timers}
+            onFormSubmit={this.handleEditFormSubmit}
+            onTrashClick={this.onTrashClick}
+          />
           <ToggleableTimerForm
             isOpen={true}
             onFormSubmit={this.handleCreateFormSubmit}
